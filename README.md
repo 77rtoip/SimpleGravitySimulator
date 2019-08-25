@@ -1,2 +1,2 @@
 # SimpleGravitySimulator
-Testing gravity simulator in 2D - don't expect a 3D experience like Universe Sandbox :p
+Test gravity simulator in 2D. Actually, not even simulator, but sandbox for some ideas.
