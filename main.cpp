@@ -1,10 +1,9 @@
 #include <graphics.h>
-#include <windows.h>
 #include <iostream>
-#include <conio.h>
 #include <cmath>
-#include <complex>
+
 #define MAX_NUMBER_OF_BODIES 10
+
 
 // Gravity simulator
 
@@ -12,13 +11,14 @@ class GravBody {
 public:
     std::string name;
     double X, Y, VX, VY, mass;
+    int color;
 
     GravBody() {
         X = 0; Y = 0; VX = 0; VY = 0; mass = 1;
     }
 
-    GravBody(std::string nn, double xx, double yy, double vvx, double vvy, double mm) {
-        name = nn; X = xx; Y = yy; VX = vvx; VY = vvy; mass = mm;
+    GravBody(std::string nn, double xx, double yy, double vvx, double vvy, double mm, int cc) {
+        name = nn; X = xx; Y = yy; VX = vvx; VY = vvy; mass = mm; color = cc;
     }
 
     void PrintStartingInfo() {
@@ -43,8 +43,9 @@ class SystemOfBodies {
 public:
     std::string name;
     const double gravConst = 1;
-    const double deltaT = 0.1;
+    const double deltaT = 0.0001;
     double time;
+    int delay = 1;
     int number;
     GravBody body[MAX_NUMBER_OF_BODIES];
     SystemOfBodies(std::string nn, GravBody b) {
@@ -106,12 +107,37 @@ public:
     }
 };
 
+// Put pixel with anti-aliasing
+// source:
+// https://stackoverflow.com/questions/8447937/
+// anti-aliased-pixel-rendering
+// author: fredoverflow
+// Sadly, this doesn't work properly!
+// Redundant, but I keep it for now, maybe will improve
+
+void putpixelAA(double x, double y) {
+    int x0 = int(x);
+    int x1 = x0 + 1;
+    int y0 = int(y);
+    int y1 = y0 + 1;
+
+    double weight_x1 = x - x0;
+    double weight_x0 = 1 - weight_x1;
+    double weight_y1 = y - y0;
+    double weight_y0 = 1 - weight_y1;
+
+    putpixel(x0, y0, int((weight_x0 * weight_y0) * 15));
+    putpixel(x1, y0, int((weight_x1 * weight_y0) * 15));
+    putpixel(x0, y1, int((weight_x0 * weight_y1) * 15));
+    putpixel(x1, y1, int((weight_x1 * weight_y1) * 15));
+}
+
 int main()
 {
     unsigned long screenWidth = GetSystemMetrics(SM_CXSCREEN);
     unsigned long screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-    int gdriver = VGA, gmode =  VGAMAX, errorcode;
+    int gdriver = VGA, gmode = VGAMAX, errorcode;
     struct palettetype pal;
 
     initgraph(&gdriver, &gmode, "");
@@ -126,29 +152,37 @@ int main()
         exit(1);
     }
 
-/*    getpalette(&pal);
-    for (int i = 0; i < pal.size; ++i)
-        setrgbpalette(pal.colors[i], i * 16, i * 16, i * 16);*/
+//    getpalette(&pal);
+//    for (int i = 0; i < pal.size; ++i)
+//        setrgbpalette(pal.colors[i], i * 16, i * 16, i * 16);
 
     int const xmax_screen = getmaxx();
     int const ymax_screen = getmaxy();
 
 // Main code
 
-    GravBody earth("Earth", 0, 50, 5, 0, 1);
-    GravBody sun("Sun", 0, 0, 0, 0, 1000);
-    GravBody moon("Moon", 0, 55, 5.1, 0, 0.1);
-    SystemOfBodies s1("Solar System", earth);
-    s1.Add(sun);
+    GravBody earth("Earth", 0, 50, 15, 0, 5, LIGHTGREEN);
+    GravBody sun("Sun", 0, 0, 0, 0, 10000, YELLOW);
+    GravBody moon("Moon", 0, 52, 15.2, 0, 0.7, LIGHTRED);
+    GravBody UFO("UFO", -100, -100, -3, 6, 50, LIGHTBLUE);
+    SystemOfBodies s1("Solar System", sun);
+    s1.Add(earth);
     s1.Add(moon);
+    s1.Add(UFO);
     s1.PrintStartingInfo();
+    double zoom = 2;
+
     do {
         for (int i = 0; i < s1.number; ++i) {
-            putpixel(s1.body[i].X + xmax_screen / 2, ymax_screen / 2 - s1.body[i].Y, WHITE);
+            int x_coor = (int)(zoom * s1.body[i].X + xmax_screen / 2);
+            int y_coor = (int)(ymax_screen / 2 - zoom * s1.body[i].Y);
+            putpixel(x_coor, y_coor, s1.body[i].color);
+
         }
-        s1.PrintInfo();
+        //s1.PrintInfo();
         s1.CalculateMovement();
-    } while (s1.time < 1000);
+        //Sleep(s1.delay);
+    } while (s1.time < 2000);
 
     getch();
     cleardevice();
