@@ -110,12 +110,9 @@ public:
 // Put pixel with anti-aliasing
 // source:
 // https://stackoverflow.com/questions/8447937/
-// anti-aliased-pixel-rendering
-// author: fredoverflow
-// Sadly, this doesn't work properly!
-// Redundant, but I keep it for now, maybe will improve
+// Not used here
 
-void putpixelAA(double x, double y) {
+/*void putpixelAA(double x, double y) {
     int x0 = int(x);
     int x1 = x0 + 1;
     int y0 = int(y);
@@ -130,7 +127,7 @@ void putpixelAA(double x, double y) {
     putpixel(x1, y0, int((weight_x1 * weight_y0) * 15));
     putpixel(x0, y1, int((weight_x0 * weight_y1) * 15));
     putpixel(x1, y1, int((weight_x1 * weight_y1) * 15));
-}
+} */
 
 int main()
 {
